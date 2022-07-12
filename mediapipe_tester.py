@@ -11,7 +11,7 @@ import time
 mp_face_detection = mp.solutions.face_detection
 mp_drawing = mp.solutions.drawing_utils
 
-model = load_model("model_landmark.h5")
+model = load_model("edge_model.h5")
 
 predictor = dlib.shape_predictor('./shape_predictor_68_face_landmarks.dat')
 
@@ -28,7 +28,7 @@ new_frame_time = 0
 
 
 # For webcam input:
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 with mp_face_detection.FaceDetection(
         model_selection=0, min_detection_confidence=0.5) as face_detection:
     while cap.isOpened():
