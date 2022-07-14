@@ -1,5 +1,6 @@
 import cv2
 import dlib
+import time
 import numpy as np
 from keras.preprocessing import image
 from sklearn.metrics import euclidean_distances
@@ -7,7 +8,7 @@ from keras.models import load_model
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
-model = load_model("edge_model.h5")
+model = load_model("tf_edge_model.h5")
 
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor('./shape_predictor_68_face_landmarks.dat')
@@ -21,7 +22,13 @@ labels_class = ['Neutral', 'engaged',
 # Emotion detection labels
 # labels_class = ['angry','control','happy','neutral','sad']
 
-cap = cv2.VideoCapture(1)
+# used to record the time when we processed last frame
+prev_frame_time = 0
+
+# used to record the time at which we processed current frame
+new_frame_time = 0
+
+cap = cv2.VideoCapture(0)
 
 while True:
     ret, test_img = cap.read()
@@ -80,6 +87,28 @@ while True:
 
             # draw box over face
             cv2.rectangle(test_img, (x, y), (x+w, y+h), (0, 0, 255), 2)
+
+     # time when we finish processing for this frame
+    new_frame_time = time.time()
+
+    # Calculating the fps
+
+    # fps will be number of frame processed in given time frame
+    # since their will be most of time error of 0.001 second
+    # we will be subtracting it to get more accurate result
+    fps = 1/(new_frame_time-prev_frame_time)
+    prev_frame_time = new_frame_time
+
+    # converting the fps into integer
+    fps = int(fps)
+
+    # converting the fps to string so that we can display it on frame
+    # by using putText function
+    fps = str(fps)
+
+    # putting the FPS count on the frame
+    cv2.putText(test_img, "FPS: " + fps, (0, 25), cv2.FONT_HERSHEY_SIMPLEX,
+                1, (100, 255, 0), 1, cv2.LINE_AA)
 
     resized_img = cv2.resize(test_img, (1000, 700))
     cv2.imshow('Facial emotion analysis ', resized_img)

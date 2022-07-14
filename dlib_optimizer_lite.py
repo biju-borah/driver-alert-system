@@ -8,7 +8,10 @@ from keras.models import load_model
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
-model = load_model("edge_model.h5")
+interpreter = tf.lite.Interpreter(model_path='tf_lite_model.tflite')
+interpreter.allocate_tensors()
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
 
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor('./shape_predictor_68_face_landmarks.dat')
@@ -65,11 +68,16 @@ while True:
         eucl_dist = euclidean_distances(shape, shape)
         X.append(eucl_dist)
 
-        X = np.array(X)
+        X = np.array(X, dtype=np.float32)
 
         X_train = tf.expand_dims(X, axis=-1)
 
-        predictions = model.predict(X_train)
+        interpreter.set_tensor(input_details[0]['index'], X_train)
+        interpreter.invoke()
+        tflite_model_predictions = interpreter.get_tensor(
+            output_details[0]['index'])
+        prediction_classes = np.argmax(tflite_model_predictions, axis=1)
+        predictions = tflite_model_predictions
         print(predictions)
 
         # Display the landmarks
