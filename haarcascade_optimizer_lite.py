@@ -12,10 +12,10 @@ interpreter.allocate_tensors()
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
-detector = dlib.get_frontal_face_detector()
+# detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor('./shape_predictor_68_face_landmarks.dat')
-# face_haar_cascade = cv2.CascadeClassifier(
-#     cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+face_haar_cascade = cv2.CascadeClassifier(
+    cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 
 labels_class = ['Neutral', 'engaged',
@@ -31,7 +31,7 @@ new_frame_time = 0
 cap = cv2.VideoCapture(0)
 
 frame = 0
-rects = None
+faces_detected = None
 
 while True:
     ret, test_img = cap.read()
@@ -40,23 +40,18 @@ while True:
     img = cv2.cvtColor(test_img, cv2.COLOR_BGR2RGB)
     gray_img = cv2.cvtColor(test_img, cv2.COLOR_BGR2GRAY)
 
-    # faces_detected = face_haar_cascade.detectMultiScale(gray_img, 1.32, 5)
-
-    # for (x, y, w, h) in faces_detected:
-    #     cv2.rectangle(test_img, (x, y), (x+w, y+h), (0, 255, 0), thickness=3)
-
     if(frame > 3):
-        rects = detector(gray_img, 1)
+        faces_detected = face_haar_cascade.detectMultiScale(gray_img, 1.32, 5)
         frame = 0
 
-    if rects is None:
+    if faces_detected is None:
         frame += 1
         continue
 
-    for rect in rects:
-        print(frame)
+    for (x, y, w, h) in faces_detected:
+
         X = []
-        shape = predictor(gray_img, rects[0])
+        shape = predictor(gray_img, dlib.rectangle(x, y, x+w, y+h))
 
         shape_np = np.zeros((68, 2), dtype="int")
 
@@ -79,19 +74,13 @@ while True:
         predictions = tflite_model_predictions
         print(predictions)
 
-        # Display the landmarks
-        for i, (x, y) in enumerate(shape):
+        for i, (_x, _y) in enumerate(shape):
             # Draw the circle to mark the keypoint
-            cv2.circle(test_img, (x, y), 1, (0, 0, 0), -1)
+            cv2.circle(test_img, (_x, _y), 1, (0, 0, 0), -1)
 
         cv2.putText(test_img, labels_class[np.argmax(predictions)] + " " + str(round(predictions[0][np.argmax(
             predictions)] * 100, 2)), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         print("Predicted state: ", labels_class[np.argmax(predictions)])
-
-        x = rect.left()
-        y = rect.top()
-        w = rect.right() - x
-        h = rect.bottom() - y
 
         if (labels_class[np.argmax(predictions)] == "Neutral" or labels_class[np.argmax(predictions)] == "engaged" or labels_class[np.argmax(predictions)] == "frustrated"):
 

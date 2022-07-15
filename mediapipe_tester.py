@@ -11,7 +11,7 @@ import time
 mp_face_detection = mp.solutions.face_detection
 mp_drawing = mp.solutions.drawing_utils
 
-model = load_model("edge_model.h5")
+model = load_model("tf_edge_model.h5")
 
 predictor = dlib.shape_predictor('./shape_predictor_68_face_landmarks.dat')
 
