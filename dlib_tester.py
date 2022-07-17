@@ -65,9 +65,9 @@ while True:
         print(predictions)
 
         # Display the landmarks
-        for i, (x, y) in enumerate(shape):
-            # Draw the circle to mark the keypoint
-            cv2.circle(test_img, (x, y), 1, (0, 0, 0), -1)
+        # for i, (x, y) in enumerate(shape):
+        #     # Draw the circle to mark the keypoint
+        #     cv2.circle(test_img, (x, y), 1, (0, 0, 0), -1)
 
         cv2.putText(test_img, labels_class[np.argmax(predictions)] + " " + str(round(predictions[0][np.argmax(
             predictions)] * 100, 2)), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
@@ -111,7 +111,7 @@ while True:
                 1, (100, 255, 0), 1, cv2.LINE_AA)
 
     resized_img = cv2.resize(test_img, (1000, 700))
-    cv2.imshow('Facial emotion analysis ', resized_img)
+    cv2.imshow('Driver alert system', resized_img)
 
     if cv2.waitKey(10) == ord('q'):  # wait until 'q' key is pressed
         break
