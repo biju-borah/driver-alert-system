@@ -86,7 +86,6 @@ while True:
 
         cv2.putText(test_img, labels_class[np.argmax(predictions)] + " " + str(round(predictions[0][np.argmax(
             predictions)] * 100, 2)), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-        print("Predicted state: ", labels_class[np.argmax(predictions)])
 
         x = rect.left()
         y = rect.top()
@@ -102,6 +101,18 @@ while True:
 
             # draw box over face
             cv2.rectangle(test_img, (x, y), (x+w, y+h), (0, 0, 255), 2)
+
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            text = "!!! ---- WARNING ---- !!!"
+
+            # get boundary of this text
+            textsize = cv2.getTextSize(text, font, 1, 2)[0]
+
+            # get coords based on boundary
+            textX = (test_img.shape[1] - textsize[0]) / 2
+            textY = (test_img.shape[0] + textsize[1]) / 2
+            cv2.putText(test_img, text, (int(textX), int(textY)),
+                        font, 1, (0, 0, 255), 3)
 
         break
 
